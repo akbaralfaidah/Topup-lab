@@ -1,0 +1,16 @@
+.agents/
+AGENTS.md
+MASTER_PROMPT.md
+RULE.md
+PRD.md
+DESIGN.md
+skills-lock.json
+package-lock.json
+node_modules/
+.next/
+.npm-cache/
+drizzle/meta/
+artifacts/
+test-results/
+playwright-report/
+next-env.d.ts
