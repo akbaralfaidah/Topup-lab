@@ -58,3 +58,7 @@ Phase 1 is accepted by the user. Drizzle ORM is now the accepted ORM; no Prisma 
 ## Phase 3 scope — 2026-09-24
 
 The user accepted Phase 2 and authorized the database domain model and local migrations. Drizzle/PostgreSQL remain unchanged. Phase 3 adds relational schema, structural constraints, history guards, schema tests and documentation only. See `domain-model.md` and `phase-3-report.md`. Phase 4 demo data and all business workflows require a later instruction.
+
+## Phase 4 scope (2026-09-24)
+
+The user accepted Phase 3 and its live database validation, then authorized deterministic local demo fixtures only. The separate `db:seed:demo` command is restricted to explicitly named disposable local databases and has no effect on the technical seed or production environments. The dataset is versioned and checked for drift without updating immutable history. See `demo-data.md`. Phase 5 pages and all business workflows still require later authorization.

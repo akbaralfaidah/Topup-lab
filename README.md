@@ -1,6 +1,6 @@
 # TOPUPLAB
 
-TOPUPLAB includes the accepted application foundation, design system, and Phase 3 relational domain schema. The public shell clearly says transactions are not open. Catalog, checkout, payment, provider, wallet, and referral workflows remain unimplemented.
+TOPUPLAB includes the accepted application foundation, design system, and Phase 3 relational domain schema. Phase 4 adds guarded local demo data. The public shell clearly says transactions are not open. Catalog, checkout, payment, provider, wallet, and referral workflows remain unimplemented.
 
 ## Requirements
 
@@ -46,7 +46,7 @@ In demo development, visit `/dev/design-system`. Production disables it by defau
 
 ## Domain model (Phase 3)
 
-See [the domain-model guide](docs/domain-model.md) for entity groups, ER diagrams, integer-IDR conventions, immutable history, privacy boundaries, and future transaction requirements. Additive migrations preserve the foundation migration and add the relational domain plus database history guards. PostgreSQL 17.11 live validation passed, including migration/seed repetition and guard/recovery tests; see [local setup and acceptance evidence](docs/phase-3-live-validation.md). Run `npm run db:validate:live` against the documented isolated local cluster. No business/demo seed data is added.
+See [the domain-model guide](docs/domain-model.md) for entity groups, ER diagrams, integer-IDR conventions, immutable history, privacy boundaries, and future transaction requirements. Additive migrations preserve the foundation migration and add the relational domain plus database history guards. PostgreSQL 17.11 live validation passed, including migration/seed repetition and guard/recovery tests; see [local setup and acceptance evidence](docs/phase-3-live-validation.md). Run `npm run db:validate:live` against the documented isolated local cluster. [The Phase 4 demo data guide](docs/demo-data.md) documents its separate, guarded seed and reset procedure.
 
 Environment validation runs when the server starts, not during compilation. Production startup requires an HTTPS APP_URL and non-placeholder database/Redis passwords. Provider/payment credentials are intentionally absent until their feature phases. A `live` APP_MODE enables no transactions in this foundation.
 

@@ -12,7 +12,7 @@ The existing environment had no PostgreSQL or Docker installation available. A p
 - Cluster data: `runtime/postgresql17/data/`.
 - Bind address: `127.0.0.1`, port `55417`.
 - Authentication: SCRAM-SHA-256 with a randomly generated 32-byte password.
-- Cluster: UTF-8, locale C, timezone Asia/Bangkok, data checksums enabled.
+- Cluster: UTF-8, locale C, data checksums enabled. Initially Asia/Bangkok; Phase 4 local-only validation changed the operational default to Asia/Jakarta and verified that a stored `timestamptz` instant retained the same epoch.
 - Local operations role: `topuplab_local`; this is a development cluster owner, not a production runtime-role template.
 - Connection configuration: `runtime/postgresql17/local.json`. The runtime directory's Windows ACL is restricted to the current user. The temporary initialization password file was removed.
 
