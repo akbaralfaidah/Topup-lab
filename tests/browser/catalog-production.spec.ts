@@ -4,7 +4,12 @@ import AxeBuilder from "@axe-core/playwright";
 test("production catalog routes have a safe unavailable state", async ({
   page,
 }) => {
-  for (const path of ["/products", "/products?q=ml", "/games/mobile-legends"]) {
+  for (const path of [
+    "/products",
+    "/products?q=ml",
+    "/games/mobile-legends",
+    "/products/pulsa-demo-10000",
+  ]) {
     const response = await page.goto(path);
     expect(response?.status()).toBe(200);
     await expect(page.getByText("Katalog belum tersedia.")).toBeVisible();
@@ -21,4 +26,14 @@ test("production catalog routes have a safe unavailable state", async ({
     path: "artifacts/catalog-unavailable-production.png",
     fullPage: true,
   });
+});
+
+test("production quote endpoint never returns a demo price", async ({
+  request,
+}) => {
+  const response = await request.post("/api/demo/quote", {
+    data: { productSlug: "mobile-legends-12", payment: "QRIS" },
+  });
+  expect(response.status()).toBe(503);
+  expect(await response.json()).toEqual({ state: "unavailable" });
 });

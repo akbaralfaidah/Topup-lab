@@ -308,6 +308,12 @@ export default async function ProductsPage({
                               <ArrowRight size={16} aria-hidden="true" />
                             </Link>
                           )}
+                        {product.categorySlug !== "game" && (
+                          <Link href={`/products/${product.slug}`}>
+                            Lihat produk{" "}
+                            <ArrowRight size={16} aria-hidden="true" />
+                          </Link>
+                        )}
                       </article>
                     ))}
                   </div>

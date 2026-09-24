@@ -3,7 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { getPublicCatalog } from "@/server/public-catalog";
+import { readDemoPreviews } from "@/server/pricing/preview";
+import { PreparationForm } from "@/components/checkout/preparation-form";
 import "../../catalog.css";
+import "../../preparation.css";
 
 export const dynamic = "force-dynamic";
 
@@ -16,9 +19,11 @@ export async function generateMetadata({
   const catalog = await getPublicCatalog();
   const group = catalog.groups.find((item) => item.slug === slug);
   return {
-    title: group ? `${group.name} — Pilihan nominal` : "Pilihan game",
+    title: group
+      ? `${group.name} — Nominal dan pratinjau harga`
+      : "Pilihan game",
     description: group
-      ? `Lihat pilihan nominal demo ${group.name} di TOPUPLAB. Halaman ini hanya untuk penelusuran; transaksi belum tersedia.`
+      ? `Isi data tujuan, pilih nominal, dan tinjau harga contoh ${group.name} di TOPUPLAB. Transaksi belum tersedia.`
       : "Katalog game TOPUPLAB belum tersedia.",
     alternates: {
       canonical: group ? `/games/${group.slug}` : "/products?category=game",
@@ -63,6 +68,18 @@ export default async function GameGroupPage({
     .sort(
       (a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, "id"),
     );
+  const preview = await readDemoPreviews(
+    denominations.map((item) => item.slug),
+    "QRIS",
+  );
+  const definition =
+    preview.state === "ready" ? preview.products[0]?.inputDefinition : null;
+  const matchingDefinition =
+    preview.state === "ready" &&
+    preview.products.every(
+      (item) =>
+        JSON.stringify(item.inputDefinition) === JSON.stringify(definition),
+    );
   return (
     <div className="catalog-page game-page">
       <nav aria-label="Jejak halaman" className="catalog-breadcrumb">
@@ -77,8 +94,8 @@ export default async function GameGroupPage({
           <p className="catalog-kicker">Game / Pilihan nominal</p>
           <h1>{group.name}</h1>
           <p>
-            Lihat nominal yang tercatat di katalog demo. Pembelian dan pengisian
-            ID pemain belum tersedia.
+            Masukkan data tujuan, pilih nominal, lalu periksa harga contoh.
+            Belum ada transaksi atau pembayaran yang dibuat.
           </p>
           <Link href="/products?category=game">
             <ArrowLeft size={17} aria-hidden="true" /> Semua game
@@ -95,47 +112,22 @@ export default async function GameGroupPage({
           <small>TOPUPLAB / GAME</small>
         </div>
       </header>
-      <section
-        className="game-denominations"
-        aria-labelledby="denominations-title"
-      >
-        <div className="catalog-section-head">
-          <div>
-            <p className="catalog-kicker">
-              {denominations.length} pilihan demo
-            </p>
-            <h2 id="denominations-title">Pilihan nominal</h2>
-          </div>
-          <span>{group.availableCount} tersedia dalam data demo</span>
-        </div>
-        <ul>
-          {denominations.map((item, index) => (
-            <li key={item.slug} id={`nominal-${item.slug}`}>
-              <span className="game-denomination-index">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <div>
-                <strong>{item.denomination}</strong>
-                <small>{item.name}</small>
-              </div>
-              <span
-                className={`catalog-availability ${item.available ? "is-available" : "is-unavailable"}`}
-              >
-                {item.available
-                  ? "Contoh tersedia"
-                  : "Sementara tidak tersedia"}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </section>
-      <aside className="game-page-note">
-        <strong>Ini halaman penelusuran.</strong>
-        <p>
-          Nominal dan ketersediaan di atas adalah data demo. Harga akhir, tujuan
-          top up, dan transaksi akan ditangani pada fase berikutnya.
-        </p>
-      </aside>
+      {preview.state === "ready" && definition && matchingDefinition ? (
+        <PreparationForm
+          name={group.name}
+          category="game"
+          products={preview.products.map((item) => item.quote)}
+          definition={definition}
+        />
+      ) : (
+        <section className="catalog-unavailable" role="status">
+          <h2>Pratinjau harga belum tersedia.</h2>
+          <p>Data demo sedang tidak dapat diperiksa. Coba lagi nanti.</p>
+          <Link href="/products?category=game">
+            Lihat game lain <ArrowRight size={17} aria-hidden="true" />
+          </Link>
+        </section>
+      )}
     </div>
   );
 }

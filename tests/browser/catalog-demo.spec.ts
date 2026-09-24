@@ -73,7 +73,9 @@ test("homepage discovery enters game preview without purchase controls", async (
   await page.locator(".game-tile").first().click();
   await expect(page).toHaveURL(/\/games\//);
   await expect(
-    page.getByRole("heading", { name: "Pilihan nominal" }),
+    page
+      .locator(".game-denominations")
+      .getByRole("heading", { name: "Pilih nominal" }),
   ).toBeVisible();
   await expect(page.locator(".game-denominations li")).not.toHaveCount(0);
   await expect(page.locator(".game-denominations li").first()).toContainText(
@@ -83,10 +85,10 @@ test("homepage discovery enters game preview without purchase controls", async (
     "Sementara tidak tersedia",
   );
   await expect(page.locator(".game-denominations li").nth(1)).toContainText(
-    "Contoh tersedia",
+    "Rp",
   );
   expect(await page.content()).not.toMatch(forbidden);
-  await expect(page.getByText("Ini halaman penelusuran.")).toBeVisible();
+  await expect(page.getByText("Belum ada pesanan yang dibuat.")).toBeVisible();
   await expect(
     page.getByRole("button", { name: /beli|bayar|checkout/i }),
   ).toHaveCount(0);
@@ -166,7 +168,7 @@ test("catalog keyboard, reduced motion, axe, text enlargement, and no-JS", async
   ).toBeVisible();
   await noJs.goto("http://localhost:3200/games/free-fire");
   await expect(
-    noJs.getByRole("heading", { name: "Pilihan nominal" }),
+    noJs.getByRole("heading", { name: "Pilih nominal" }),
   ).toBeVisible();
   await context.close();
 });

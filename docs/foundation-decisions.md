@@ -70,3 +70,7 @@ The user accepted Phase 4 and authorized the public homepage only. The page read
 ## Phase 6 scope (2026-09-24)
 
 The user accepted Phase 5 and authorized public catalog discovery and search only. The shared customer-safe projection serves the homepage and `/products`; `/games/[slug]` previews game denominations without input or purchase behavior. URL parameters hold search, category, availability and sort state. The feature remains restricted to the existing local demo database and remains unavailable in production. See `phase-6-catalog.md`. Phase 7 and all business mutations remain deferred.
+
+## Phase 7 scope (2026-09-24)
+
+The user accepted Phase 6 and authorized transaction-preparation UI with deterministic, server-authoritative demo quote previews. The game route now prepares a transaction; non-game products share the form through `/products/[slug]`. The quote endpoint recalculates prices from eligible demo supply and Public-tier rules without domain writes. Target data is validated and masked for review, not persisted. See `phase-7-product-checkout.md`. Phase 8 pricing administration, Phase 10 orders, and payment/provider workflows remain deferred.
