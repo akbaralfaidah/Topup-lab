@@ -10,6 +10,7 @@ const testServers = [
 
 export default defineConfig({
   testDir: "./tests/browser",
+  testIgnore: "home-demo.spec.ts",
   fullyParallel: true,
   workers: 2,
   use: {

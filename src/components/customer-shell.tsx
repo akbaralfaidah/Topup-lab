@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { Brand } from "./brand";
+import { getHomepageData } from "@/server/homepage";
 
-export function CustomerShell({ children }: { children: React.ReactNode }) {
+export async function CustomerShell({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const demo = (await getHomepageData()).state === "demo";
   return (
     <div className="site-shell">
       <a className="skip-link" href="#main">
@@ -12,11 +18,41 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
           <Link className="brand-home" href="/" aria-label="TOPUPLAB, beranda">
             <Brand />
           </Link>
-          <nav aria-label="Navigasi utama">
-            <Link className="nav-link" href="/#ketersediaan">
-              Info layanan
+          <nav className="desktop-nav" aria-label="Navigasi utama">
+            {demo && (
+              <>
+                <Link className="nav-link" href="/#cari">
+                  Cari produk
+                </Link>
+                <Link className="nav-link" href="/#game">
+                  Game
+                </Link>
+                <Link className="nav-link" href="/#digital">
+                  Layanan digital
+                </Link>
+                <Link className="nav-link" href="/#flash-sale">
+                  Flash sale
+                </Link>
+              </>
+            )}
+            <Link className="nav-link" href="/#bantuan">
+              Bantuan
             </Link>
           </nav>
+          <details className="mobile-nav">
+            <summary>Menu</summary>
+            <nav aria-label="Navigasi seluler">
+              {demo && (
+                <>
+                  <Link href="/#cari">Cari produk</Link>
+                  <Link href="/#game">Game</Link>
+                  <Link href="/#digital">Layanan digital</Link>
+                  <Link href="/#flash-sale">Flash sale</Link>
+                </>
+              )}
+              <Link href="/#bantuan">Bantuan</Link>
+            </nav>
+          </details>
         </div>
       </header>
       <main id="main" className="page-container main-content" tabIndex={-1}>
@@ -24,7 +60,7 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
       </main>
       <footer className="site-footer page-container">
         <span>TOPUPLAB</span>
-        <p>Top up game & kebutuhan digital.</p>
+        <p>Top up game & kebutuhan digital. Transaksi belum tersedia.</p>
       </footer>
     </div>
   );

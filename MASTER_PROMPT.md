@@ -72,7 +72,7 @@ Never override a security or financial invariant for visual convenience.
 
 Specified installed skills are mandatory when available in the active agent environment. Codex and Antigravity may have different installed skill sets. Inspect actual availability each session; never fabricate or simulate skill use. Report missing relevant skills under `Skills Unavailable`. A missing skill alone does not block implementation unless its capability cannot reasonably be completed safely without it. Use other installed skills where relevant without claiming they replace a missing skill. When working in Antigravity, actively use the user's installed skill set according to this document. Preserve an existing skills-lock.json; never fabricate one.
 
-The Phase 0 audit, Phase 1 foundation, Phase 2 design system, and Phase 3 Database Domain Model with live PostgreSQL validation are accepted. The user's subsequent Phase 4 request authorizes deterministic demo data only. Drizzle ORM remains accepted. Preserve earlier phases and do not implement Phase 5 product pages or business workflows. See docs/domain-model.md, docs/phase-3-live-validation.md, and docs/demo-data.md for these milestones.
+The Phase 0 audit, Phase 1 foundation, Phase 2 design system, Phase 3 Database Domain Model with live PostgreSQL validation, and Phase 4 demo data are accepted. The user's subsequent Phase 5 request authorizes the public homepage only. Drizzle ORM remains accepted. Preserve earlier phases and do not implement Phase 6 catalog/search backend, Phase 7 product/checkout, or business workflows. See docs/domain-model.md, docs/phase-3-live-validation.md, docs/demo-data.md, and docs/phase-5-homepage.md for these milestones.
 
 This project has installed skills.
 

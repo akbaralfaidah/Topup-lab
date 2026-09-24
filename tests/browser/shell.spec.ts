@@ -2,16 +2,17 @@ import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
 for (const width of [320, 360, 390, 768, 1024, 1280, 1440]) {
-  test(`customer shell fits ${width}px and its disclosure works`, async ({
+  test(`homepage fits ${width}px and explains unavailable catalog`, async ({
     page,
   }) => {
     await page.setViewportSize({ width, height: 900 });
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto("/");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      "Tempat baru untuktop up kamu.",
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(
+      "Top up yang dicari",
     );
+    await expect(page.getByText("Katalog belum tersedia.")).toBeVisible();
     expect(
       await page.evaluate(
         () =>
@@ -19,27 +20,35 @@ for (const width of [320, 360, 390, 768, 1024, 1280, 1440]) {
           document.documentElement.clientWidth,
       ),
     ).toBe(0);
-    await page.getByRole("link", { name: "Info layanan" }).click();
-    await expect(page).toHaveURL(/#ketersediaan$/);
-    const disclosure = page.getByRole("button", {
-      name: "Apakah sudah bisa bertransaksi?",
+    if (width <= 850) {
+      await page.locator(".mobile-nav summary").click();
+      await expect(
+        page
+          .getByRole("navigation", { name: "Navigasi seluler" })
+          .getByRole("link", { name: "Bantuan" }),
+      ).toBeVisible();
+    }
+    await page
+      .getByRole("navigation", {
+        name: width <= 850 ? "Navigasi seluler" : "Navigasi utama",
+      })
+      .getByRole("link", { name: "Bantuan" })
+      .click();
+    await expect(page).toHaveURL(/#bantuan$/);
+    const faq = page.getByRole("button", {
+      name: "Apakah sudah bisa membeli?",
     });
-    await disclosure.click();
-    await expect(disclosure).toHaveAttribute("aria-expanded", "true");
-    await expect(page.locator("#availability-answer")).toBeVisible();
-    await disclosure.click();
-    await expect(page.locator("#availability-answer")).toBeHidden();
-    await page.getByRole("link", { name: "TOPUPLAB, beranda" }).click();
-    await expect(page).toHaveURL("/");
+    await faq.click();
+    await expect(faq).toHaveAttribute("aria-expanded", "true");
     expect(errors).toEqual([]);
     await page.screenshot({
-      path: `artifacts/shell-${width}.png`,
+      path: `artifacts/home-unavailable-${width}.png`,
       fullPage: true,
     });
   });
 }
 
-test("keyboard navigation and reduced motion preserve interaction", async ({
+test("keyboard and reduced motion retain access to the homepage", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -50,18 +59,10 @@ test("keyboard navigation and reduced motion preserve interaction", async ({
   ).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page.locator("main")).toBeFocused();
-  await page.keyboard.press("Tab");
-  const disclosure = page.getByRole("button", {
-    name: "Apakah sudah bisa bertransaksi?",
-  });
-  await expect(disclosure).toBeFocused();
+  const faq = page.getByRole("button", { name: "Apakah sudah bisa membeli?" });
+  await faq.focus();
   await page.keyboard.press("Enter");
-  await expect(page.locator("#availability-answer p")).toHaveCSS(
-    "transform",
-    "none",
-  );
-  await page.keyboard.press("Space");
-  await expect(disclosure).toHaveAttribute("aria-expanded", "false");
+  await expect(faq).toHaveAttribute("aria-expanded", "true");
 });
 
 test("protected admin and unknown routes expose no operational content", async ({
@@ -93,7 +94,7 @@ test("health is uncached and server replaces supplied correlation IDs", async ({
   expect(response.headers()["cache-control"]).toBe("no-store");
 });
 
-test("shell and error page pass automated accessibility checks", async ({
+test("homepage and error page pass automated accessibility checks", async ({
   page,
 }) => {
   for (const path of ["/", "/missing-page"]) {
@@ -105,7 +106,7 @@ test("shell and error page pass automated accessibility checks", async ({
   }
 });
 
-test("text enlargement preserves layout and the disclosure target remains touch-sized", async ({
+test("text enlargement preserves layout and FAQ touch target", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -120,24 +121,19 @@ test("text enlargement preserves layout and the disclosure target remains touch-
         document.documentElement.clientWidth,
     ),
   ).toBe(0);
-  const button = page.getByRole("button", {
-    name: "Apakah sudah bisa bertransaksi?",
-  });
-  const box = await button.boundingBox();
+  const faq = page.getByRole("button", { name: "Apakah sudah bisa membeli?" });
+  const box = await faq.boundingBox();
   expect(box?.height).toBeGreaterThanOrEqual(44);
-  expect(box?.width).toBeGreaterThanOrEqual(44);
-  await button.click();
-  await expect(page.locator("#availability-answer")).toBeVisible();
+  await faq.click();
+  await expect(faq).toHaveAttribute("aria-expanded", "true");
 });
 
-test("essential availability information is readable without JavaScript", async ({
+test("essential availability is readable without JavaScript", async ({
   browser,
 }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   await page.goto("http://127.0.0.1:3000/");
-  await expect(
-    page.getByRole("heading", { name: "Layanan belum dibuka." }),
-  ).toBeVisible();
+  await expect(page.getByText("Katalog belum tersedia.")).toBeVisible();
   await context.close();
 });

@@ -11,9 +11,9 @@ const jakarta = localFont({
 });
 
 export const metadata: Metadata = {
-  title: { default: "TOPUPLAB | Segera hadir", template: "%s | TOPUPLAB" },
+  title: { default: "TOPUPLAB", template: "%s | TOPUPLAB" },
   description:
-    "TOPUPLAB sedang menyiapkan layanan top up game dan kebutuhan digital. Transaksi belum tersedia.",
+    "Jelajahi katalog demo TOPUPLAB untuk game dan kebutuhan digital. Transaksi belum tersedia.",
   robots: { index: false, follow: false },
 };
 

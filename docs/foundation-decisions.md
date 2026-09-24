@@ -62,3 +62,7 @@ The user accepted Phase 2 and authorized the database domain model and local mig
 ## Phase 4 scope (2026-09-24)
 
 The user accepted Phase 3 and its live database validation, then authorized deterministic local demo fixtures only. The separate `db:seed:demo` command is restricted to explicitly named disposable local databases and has no effect on the technical seed or production environments. The dataset is versioned and checked for drift without updating immutable history. See `demo-data.md`. Phase 5 pages and all business workflows still require later authorization.
+
+## Phase 5 scope (2026-09-24)
+
+The user accepted Phase 4 and authorized the public homepage only. The page reads a limited, read-only projection of the existing demo database in local development. Live and production modes show an unavailable catalog state until real data and workflows are implemented. See `phase-5-homepage.md`. Phase 6 catalog/search backend and Phase 7 product/checkout flows remain deferred.

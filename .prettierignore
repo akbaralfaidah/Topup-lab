@@ -7,6 +7,7 @@ DESIGN.md
 skills-lock.json
 package-lock.json
 node_modules/
+.vs/
 .next/
 .npm-cache/
 drizzle/meta/
