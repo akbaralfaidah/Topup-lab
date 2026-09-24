@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import {
   ArrowDownRight,
   ArrowRight,
@@ -84,9 +85,9 @@ export default async function Home() {
           )}
           {data.state === "demo" && (
             <p className="hero-suggestions">
-              Coba cari <a href="#game">Mobile Legends</a>,{" "}
-              <a href="#game">Free Fire</a>, atau lihat{" "}
-              <a href="#kategori">semua kategori</a>.
+              Coba cari <Link href="/games/mobile-legends">Mobile Legends</Link>
+              , <Link href="/games/free-fire">Free Fire</Link>, atau lihat{" "}
+              <Link href="/products">semua kategori</Link>.
             </p>
           )}
         </div>
@@ -126,8 +127,8 @@ export default async function Home() {
                     category.slug as keyof typeof iconByCategory
                   ] ?? CreditCard;
                 return (
-                  <a
-                    href={category.slug === "game" ? "#game" : "#digital"}
+                  <Link
+                    href={`/products?category=${encodeURIComponent(category.slug)}`}
                     className="category-shortcut"
                     key={category.slug}
                     aria-label={`Lihat ${category.name}`}
@@ -136,7 +137,7 @@ export default async function Home() {
                     <Icon size={24} strokeWidth={1.75} aria-hidden="true" />
                     <strong>{category.name}</strong>
                     <ArrowRight size={16} aria-hidden="true" />
-                  </a>
+                  </Link>
                 );
               })}
             </div>
@@ -159,7 +160,12 @@ export default async function Home() {
             </div>
             <div className="game-grid">
               {games.map((game, index) => (
-                <article className="game-tile" key={game.slug}>
+                <Link
+                  className="game-tile"
+                  href={`/games/${game.slug}`}
+                  key={game.slug}
+                  aria-label={`Lihat nominal ${game.name}`}
+                >
                   <div
                     className={`game-art game-art-${index % 6}`}
                     aria-hidden="true"
@@ -182,7 +188,7 @@ export default async function Home() {
                       {game.available ? "Contoh tersedia" : "Belum tersedia"}
                     </span>
                   </div>
-                </article>
+                </Link>
               ))}
             </div>
             <p className="section-footnote">
@@ -254,14 +260,19 @@ export default async function Home() {
                     category.slug as keyof typeof iconByCategory
                   ] ?? CreditCard;
                 return (
-                  <div className="digital-row" key={category.slug}>
+                  <Link
+                    className="digital-row"
+                    href={`/products?category=${encodeURIComponent(category.slug)}`}
+                    key={category.slug}
+                    aria-label={`Lihat ${category.name}`}
+                  >
                     <span className="digital-no">
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     <Icon size={22} aria-hidden="true" />
                     <strong>{category.name}</strong>
                     <p>{category.description}</p>
-                  </div>
+                  </Link>
                 );
               })}
             </div>

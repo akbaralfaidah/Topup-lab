@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { Brand } from "./brand";
-import { getHomepageData } from "@/server/homepage";
+import { getPublicCatalog } from "@/server/public-catalog";
 
 export async function CustomerShell({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const demo = (await getHomepageData()).state === "demo";
+  const demo = (await getPublicCatalog()).state === "demo";
   return (
     <div className="site-shell">
       <a className="skip-link" href="#main">
@@ -21,14 +21,14 @@ export async function CustomerShell({
           <nav className="desktop-nav" aria-label="Navigasi utama">
             {demo && (
               <>
-                <Link className="nav-link" href="/#cari">
+                <Link className="nav-link" href="/products#catalog-search">
                   Cari produk
                 </Link>
-                <Link className="nav-link" href="/#game">
+                <Link className="nav-link" href="/products?category=game">
                   Game
                 </Link>
-                <Link className="nav-link" href="/#digital">
-                  Layanan digital
+                <Link className="nav-link" href="/products#kategori">
+                  Kategori
                 </Link>
                 <Link className="nav-link" href="/#flash-sale">
                   Flash sale
@@ -44,9 +44,9 @@ export async function CustomerShell({
             <nav aria-label="Navigasi seluler">
               {demo && (
                 <>
-                  <Link href="/#cari">Cari produk</Link>
-                  <Link href="/#game">Game</Link>
-                  <Link href="/#digital">Layanan digital</Link>
+                  <Link href="/products#catalog-search">Cari produk</Link>
+                  <Link href="/products?category=game">Game</Link>
+                  <Link href="/products#kategori">Kategori</Link>
                   <Link href="/#flash-sale">Flash sale</Link>
                 </>
               )}

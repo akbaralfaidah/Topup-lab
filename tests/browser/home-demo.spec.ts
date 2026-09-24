@@ -42,7 +42,12 @@ test("search supports typing, keyboard choice, empty state and clear", async ({
   await expect(page.getByRole("listbox")).toContainText("Roblox");
   await search.press("ArrowDown");
   await search.press("Enter");
-  await expect(page.getByRole("status")).toContainText("pratinjau");
+  await expect(page).toHaveURL(/\/games\/roblox$/);
+  await expect(
+    page.getByRole("heading", { name: "Roblox", level: 1 }),
+  ).toBeVisible();
+  await page.goBack();
+  await search.fill("rob");
   await page.getByRole("button", { name: "Hapus pencarian" }).click();
   await expect(search).toHaveValue("");
   await search.fill("tidak-ada-produk");

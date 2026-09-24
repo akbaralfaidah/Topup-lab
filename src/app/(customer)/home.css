@@ -118,7 +118,7 @@
   max-width: 40rem;
   margin-top: 2rem;
 }
-.home-search > label {
+.home-search form > label {
   display: block;
   font-weight: 700;
   font-size: 0.9rem;
@@ -164,6 +164,19 @@
 .search-clear:hover {
   background: var(--surface-subdued);
 }
+.home-search-submit {
+  display: grid;
+  place-items: center;
+  flex: none;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--brand-default);
+}
+.home-search-submit:hover {
+  background: var(--brand-hover);
+}
 .search-results {
   position: absolute;
   z-index: 8;
@@ -191,7 +204,7 @@
   padding: 0;
   margin: 0;
 }
-.search-results li button {
+.search-results li a {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -202,11 +215,11 @@
   text-align: left;
   border-radius: 0.5rem;
 }
-.search-results li button[aria-selected="true"],
-.search-results li button:hover {
+.search-results li a[aria-selected="true"],
+.search-results li a:hover {
   background: var(--brand-subtle);
 }
-.search-results li button > span:nth-child(2) {
+.search-results li a > span:nth-child(2) {
   flex: 1;
   display: grid;
   min-width: 0;
@@ -330,11 +343,15 @@
   gap: 1.1rem;
 }
 .game-tile {
+  display: block;
   min-width: 0;
   border: 1px solid var(--border-subtle);
   background: var(--surface-default);
   border-radius: var(--radius-card);
   overflow: hidden;
+}
+.game-tile:hover {
+  border-color: var(--border-strong);
 }
 .game-art {
   height: 10.5rem;

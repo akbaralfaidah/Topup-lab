@@ -65,4 +65,8 @@ The user accepted Phase 3 and its live database validation, then authorized dete
 
 ## Phase 5 scope (2026-09-24)
 
-The user accepted Phase 4 and authorized the public homepage only. The page reads a limited, read-only projection of the existing demo database in local development. Live and production modes show an unavailable catalog state until real data and workflows are implemented. See `phase-5-homepage.md`. Phase 6 catalog/search backend and Phase 7 product/checkout flows remain deferred.
+The user accepted Phase 4 and authorized the public homepage only. The page reads a limited, read-only projection of the existing demo database in local development. Live and production modes show an unavailable catalog state until real data and workflows are implemented. See `phase-5-homepage.md`. Phase 6 later added read-only catalog/search; Phase 7 product/checkout flows remain deferred.
+
+## Phase 6 scope (2026-09-24)
+
+The user accepted Phase 5 and authorized public catalog discovery and search only. The shared customer-safe projection serves the homepage and `/products`; `/games/[slug]` previews game denominations without input or purchase behavior. URL parameters hold search, category, availability and sort state. The feature remains restricted to the existing local demo database and remains unavailable in production. See `phase-6-catalog.md`. Phase 7 and all business mutations remain deferred.

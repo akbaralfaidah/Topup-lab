@@ -3,6 +3,9 @@ import { cache } from "react";
 import { and, eq } from "drizzle-orm";
 import { createDatabase } from "@/server/db/connection";
 import * as s from "@/server/db/schema";
+import { localDemoCatalogEnabled } from "@/server/catalog-runtime";
+import { getPublicCatalog } from "@/server/public-catalog";
+import { groupDisplayOrder } from "@/lib/catalog-discovery";
 
 export type HomeCategory = { slug: string; name: string; description: string };
 export type HomeGroup = {
@@ -38,148 +41,71 @@ const empty: HomeData = {
 };
 const referenceTime = new Date("2026-09-24T05:00:00.000Z");
 
-function localDemoUrl(value: string | undefined) {
-  if (!value) return false;
-  try {
-    const url = new URL(value);
-    return (
-      ["postgres:", "postgresql:"].includes(url.protocol) &&
-      url.hostname === "127.0.0.1" &&
-      url.port === "55417" &&
-      url.username === "topuplab_local" &&
-      /^topuplab_demo_[a-f0-9]{12}$/.test(url.pathname.slice(1))
-    );
-  } catch {
-    return false;
-  }
-}
-
 export const getHomepageData = cache(async (): Promise<HomeData> => {
-  if (
-    process.env.NODE_ENV === "production" ||
-    process.env.APP_MODE !== "demo" ||
-    !localDemoUrl(process.env.DATABASE_URL)
-  )
-    return empty;
-
+  if (!localDemoCatalogEnabled()) return empty;
+  const catalog = await getPublicCatalog();
+  if (catalog.state !== "demo") return empty;
   const { db, pool } = createDatabase(process.env.DATABASE_URL!);
   try {
-    const [
-      categoryRows,
-      brandRows,
-      productRows,
-      supplyRows,
-      saleRows,
-      itemRows,
-      bannerRows,
-      tierRows,
-      settingRows,
-    ] = await Promise.all([
-      db
-        .select({
-          id: s.categories.id,
-          slug: s.categories.slug,
-          name: s.categories.name,
-          description: s.categories.description,
-        })
-        .from(s.categories)
-        .where(eq(s.categories.status, "ACTIVE"))
-        .orderBy(s.categories.sortOrder),
-      db
-        .select({ id: s.brands.id, slug: s.brands.slug, name: s.brands.name })
-        .from(s.brands)
-        .where(eq(s.brands.status, "ACTIVE")),
-      db
-        .select({
-          id: s.products.id,
-          name: s.products.name,
-          categoryId: s.products.categoryId,
-          brandId: s.products.brandId,
-        })
-        .from(s.products)
-        .where(eq(s.products.status, "ACTIVE")),
-      db
-        .select({
-          productId: s.providerSkus.productId,
-          available: s.providerSkus.available,
-          stockState: s.providerSkus.stockState,
-          skuEnabled: s.providerSkus.enabled,
-          providerEnabled: s.providers.enabled,
-          providerState: s.providers.operationalState,
-        })
-        .from(s.providerSkus)
-        .innerJoin(s.providers, eq(s.providerSkus.providerId, s.providers.id)),
-      db
-        .select({
-          id: s.flashSales.id,
-          name: s.flashSales.name,
-          startsAt: s.flashSales.startsAt,
-          endsAt: s.flashSales.endsAt,
-        })
-        .from(s.flashSales)
-        .where(eq(s.flashSales.status, "ACTIVE")),
-      db
-        .select({
-          saleId: s.flashSaleItems.flashSaleId,
-          productId: s.flashSaleItems.productId,
-          price: s.flashSaleItems.priceIdr,
-          quota: s.flashSaleItems.quota,
-        })
-        .from(s.flashSaleItems),
-      db
-        .select({
-          title: s.cmsBanners.title,
-          copy: s.cmsBanners.copy,
-          startsAt: s.cmsBanners.startsAt,
-          endsAt: s.cmsBanners.endsAt,
-        })
-        .from(s.cmsBanners)
-        .where(
-          and(
-            eq(s.cmsBanners.enabled, true),
-            eq(s.cmsBanners.slot, "HOME_DEMO"),
-            eq(s.cmsBanners.name, "Demo topup"),
+    const [saleRows, itemRows, bannerRows, tierRows, settingRows] =
+      await Promise.all([
+        db
+          .select({
+            id: s.flashSales.id,
+            name: s.flashSales.name,
+            startsAt: s.flashSales.startsAt,
+            endsAt: s.flashSales.endsAt,
+          })
+          .from(s.flashSales)
+          .where(eq(s.flashSales.status, "ACTIVE")),
+        db
+          .select({
+            saleId: s.flashSaleItems.flashSaleId,
+            productName: s.products.name,
+            price: s.flashSaleItems.priceIdr,
+            quota: s.flashSaleItems.quota,
+          })
+          .from(s.flashSaleItems)
+          .innerJoin(s.products, eq(s.flashSaleItems.productId, s.products.id)),
+        db
+          .select({
+            title: s.cmsBanners.title,
+            copy: s.cmsBanners.copy,
+            startsAt: s.cmsBanners.startsAt,
+            endsAt: s.cmsBanners.endsAt,
+          })
+          .from(s.cmsBanners)
+          .where(
+            and(
+              eq(s.cmsBanners.enabled, true),
+              eq(s.cmsBanners.slot, "HOME_DEMO"),
+              eq(s.cmsBanners.name, "Demo topup"),
+            ),
           ),
-        ),
-      db
-        .select({ name: s.membershipTiers.name })
-        .from(s.membershipTiers)
-        .where(eq(s.membershipTiers.active, true))
-        .orderBy(s.membershipTiers.level),
-      db
-        .select({ value: s.systemSettings.value })
-        .from(s.systemSettings)
-        .where(eq(s.systemSettings.key, "PUBLIC_CONTACT")),
-    ]);
-    if (categoryRows.length === 0 || productRows.length === 0) return empty;
-    const available = new Set(
-      supplyRows
-        .filter(
-          (row) =>
-            row.available &&
-            row.skuEnabled &&
-            row.providerEnabled &&
-            row.providerState === "HEALTHY" &&
-            row.stockState !== "OUT_OF_STOCK",
-        )
-        .map((row) => row.productId),
-    );
-    const categoryById = new Map(categoryRows.map((row) => [row.id, row.slug]));
-    const productById = new Map(productRows.map((row) => [row.id, row]));
-    const groups = brandRows
-      .map((brand) => {
-        const items = productRows.filter(
-          (product) => product.brandId === brand.id,
-        );
-        return {
-          slug: brand.slug,
-          name: brand.name,
-          category: categoryById.get(items[0]?.categoryId ?? "") ?? "",
-          packages: items.length,
-          available: items.some((item) => available.has(item.id)),
-        };
-      })
-      .filter((group) => group.packages > 0 && group.category);
+        db
+          .select({ name: s.membershipTiers.name })
+          .from(s.membershipTiers)
+          .where(eq(s.membershipTiers.active, true))
+          .orderBy(s.membershipTiers.level),
+        db
+          .select({ value: s.systemSettings.value })
+          .from(s.systemSettings)
+          .where(eq(s.systemSettings.key, "PUBLIC_CONTACT")),
+      ]);
+    const groups = new Map<string, HomeGroup>();
+    for (const item of catalog.products) {
+      if (!item.groupSlug || !item.groupName) continue;
+      const current = groups.get(item.groupSlug) ?? {
+        slug: item.groupSlug,
+        name: item.groupName,
+        category: item.categorySlug,
+        packages: 0,
+        available: false,
+      };
+      current.packages++;
+      current.available ||= item.available;
+      groups.set(current.slug, current);
+    }
     const flashes: HomeFlash[] = saleRows.map((sale) => ({
       name: sale.name,
       state:
@@ -189,11 +115,9 @@ export const getHomepageData = cache(async (): Promise<HomeData> => {
             ? "Selesai"
             : "Berlangsung",
       products: itemRows
-        .filter(
-          (item) => item.saleId === sale.id && productById.has(item.productId),
-        )
+        .filter((item) => item.saleId === sale.id)
         .map((item) => ({
-          name: productById.get(item.productId)!.name,
+          name: item.productName,
           price: item.price.toString(),
           quota: item.quota,
         })),
@@ -206,12 +130,25 @@ export const getHomepageData = cache(async (): Promise<HomeData> => {
     const contact = settingRows[0]?.value;
     return {
       state: "demo",
-      categories: categoryRows.map((row) => ({
+      categories: catalog.categories.map((row) => ({
         slug: row.slug,
         name: row.name,
-        description: row.description ?? "",
+        description: row.description,
       })),
-      groups,
+      groups: [...groups.values()].sort(
+        (a, b) =>
+          (a.category === "game"
+            ? -1
+            : (catalog.categories.find((row) => row.slug === a.category)
+                ?.sortOrder ?? 999)) -
+            (b.category === "game"
+              ? -1
+              : (catalog.categories.find((row) => row.slug === b.category)
+                  ?.sortOrder ?? 999)) ||
+          (a.category === "game" ? groupDisplayOrder(a.slug) : 0) -
+            (b.category === "game" ? groupDisplayOrder(b.slug) : 0) ||
+          a.name.localeCompare(b.name, "id"),
+      ),
       flashes,
       banner: banner ? { title: banner.title, copy: banner.copy ?? "" } : null,
       tiers: tierRows.map((row) => row.name),
