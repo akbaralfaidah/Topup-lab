@@ -54,3 +54,7 @@ The companion `design` skill referenced by design-system was not found in the in
 # Phase 2 acceptance boundary — 2026-09-23
 
 Phase 1 is accepted by the user. Drizzle ORM is now the accepted ORM; no Prisma migration is authorized. Phase 2 adds brand, design-system, and motion foundations only. The public preparation notice, authorization denial, health endpoints, request IDs, and infrastructure behavior remain in place. See `design-system.md` and `phase-2-report.md` for the visual-system implementation and validation.
+
+## Phase 3 scope — 2026-09-24
+
+The user accepted Phase 2 and authorized the database domain model and local migrations. Drizzle/PostgreSQL remain unchanged. Phase 3 adds relational schema, structural constraints, history guards, schema tests and documentation only. See `domain-model.md` and `phase-3-report.md`. Phase 4 demo data and all business workflows require a later instruction.

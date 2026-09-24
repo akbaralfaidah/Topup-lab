@@ -12,6 +12,7 @@ export default defineConfig([
     ".agents/**",
     ".npm-cache/**",
     "artifacts/**",
+    "runtime/**",
     "test-results/**",
     "playwright-report/**",
   ]),

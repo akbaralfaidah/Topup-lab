@@ -1,6 +1,6 @@
 # TOPUPLAB
 
-Phase 1 foundation for an Indonesian top-up platform. The public shell clearly says transactions are not open. No catalog, checkout, payment, provider, wallet, referral, or financial domain is implemented.
+TOPUPLAB includes the accepted application foundation, design system, and Phase 3 relational domain schema. The public shell clearly says transactions are not open. Catalog, checkout, payment, provider, wallet, and referral workflows remain unimplemented.
 
 ## Requirements
 
@@ -33,6 +33,7 @@ npm run test
 npm run format:check
 npm run build
 npm run test:browser
+npm run db:check
 ```
 
 Build first, then run browser tests. Playwright starts and stops three isolated production previews on ports 3000, 3100, and 3102; keep these ports free. Tests cover Phase 1 behavior, Design Lab production gating, responsive controls, keyboard use, overlays, axe, enlarged text, and reduced motion. Screenshots are written to ignored `artifacts/`.
@@ -42,6 +43,10 @@ Build first, then run browser tests. Playwright starts and stops three isolated 
 In demo development, visit `/dev/design-system`. Production disables it by default; a private demo preview can explicitly set `DESIGN_LAB_ENABLED=true`. Live mode always returns 404. All specimens use static demo data and local UI state. See [the design-system guide](docs/design-system.md) for tokens, component usage, brand guidance, and motion rules. Drizzle remains the accepted ORM.
 
 `npm run db:generate` creates committed migration files from the typed schema. `db:migrate` applies migrations; `db:seed` inserts only a version marker and is repeatable. Never use schema push or destructive resets on deployment databases.
+
+## Domain model (Phase 3)
+
+See [the domain-model guide](docs/domain-model.md) for entity groups, ER diagrams, integer-IDR conventions, immutable history, privacy boundaries, and future transaction requirements. Additive migrations preserve the foundation migration and add the relational domain plus database history guards. PostgreSQL 17.11 live validation passed, including migration/seed repetition and guard/recovery tests; see [local setup and acceptance evidence](docs/phase-3-live-validation.md). Run `npm run db:validate:live` against the documented isolated local cluster. No business/demo seed data is added.
 
 Environment validation runs when the server starts, not during compilation. Production startup requires an HTTPS APP_URL and non-placeholder database/Redis passwords. Provider/payment credentials are intentionally absent until their feature phases. A `live` APP_MODE enables no transactions in this foundation.
 

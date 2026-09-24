@@ -6,7 +6,7 @@ import { createDatabase } from "../src/server/db/connection";
 const { db, pool } = createDatabase(parseEnvironment(process.env).DATABASE_URL);
 try {
   await migrate(db, { migrationsFolder: "./drizzle" });
-  console.info("Foundation migrations applied.");
+  console.info("Database migrations applied.");
 } catch {
   console.error(
     "Migration failed. Check database connectivity and migration permissions.",

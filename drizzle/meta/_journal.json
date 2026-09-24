@@ -8,6 +8,27 @@
       "when": 1790124694302,
       "tag": "0000_foundation",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790172949039,
+      "tag": "0001_domain_model",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790172985956,
+      "tag": "0002_domain_guards",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790212772009,
+      "tag": "0003_key_whitespace_guards",
+      "breakpoints": true
     }
   ]
 }

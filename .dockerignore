@@ -6,6 +6,7 @@ node_modules
 .env
 .env.*
 artifacts
+runtime
 test-results
 playwright-report
 *.log

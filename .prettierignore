@@ -11,6 +11,7 @@ node_modules/
 .npm-cache/
 drizzle/meta/
 artifacts/
+runtime/
 test-results/
 playwright-report/
 next-env.d.ts
