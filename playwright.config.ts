@@ -14,6 +14,7 @@ export default defineConfig({
     "home-demo.spec.ts",
     "catalog-demo.spec.ts",
     "preparation-demo.spec.ts",
+    "pricing-demo.spec.ts",
   ],
   fullyParallel: true,
   workers: 2,

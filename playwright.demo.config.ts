@@ -6,6 +6,7 @@ export default defineConfig({
     "home-demo.spec.ts",
     "catalog-demo.spec.ts",
     "preparation-demo.spec.ts",
+    "pricing-demo.spec.ts",
   ],
   workers: 1,
   use: { baseURL: "http://localhost:3200", channel: "msedge" },

@@ -74,3 +74,7 @@ The user accepted Phase 5 and authorized public catalog discovery and search onl
 ## Phase 7 scope (2026-09-24)
 
 The user accepted Phase 6 and authorized transaction-preparation UI with deterministic, server-authoritative demo quote previews. The game route now prepares a transaction; non-game products share the form through `/products/[slug]`. The quote endpoint recalculates prices from eligible demo supply and Public-tier rules without domain writes. Target data is validated and masked for review, not persisted. See `phase-7-product-checkout.md`. Phase 8 pricing administration, Phase 10 orders, and payment/provider workflows remain deferred.
+
+## Phase 8 scope (2026-09-25)
+
+The user accepted Phase 7 and authorized a reusable pricing engine plus strictly local demo pricing-rule administration. Public quotes and the internal simulator now share bigint arithmetic and deterministic resolution. Provider-scoped rules set a separate minimum selling-price floor. `/dev/admin/pricing` supports bounded simulation and transactional rule create/update/disable with system-origin audit entries; production/live and real `/admin` remain closed. No schema migration or financial record is created. See `phase-8-pricing.md`. Authentication, persistent orders, payment and fulfillment remain deferred.

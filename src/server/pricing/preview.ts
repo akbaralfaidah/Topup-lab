@@ -9,8 +9,7 @@ import {
 import { localDemoCatalogEnabled } from "@/server/catalog-runtime";
 import {
   addPaymentFee,
-  calculateCustomerPrice,
-  selectPricingRule,
+  calculatePricing,
   type PricingRule,
 } from "./quote-math";
 
@@ -99,6 +98,7 @@ export async function readDemoPreviews(
       db
         .select({
           id: s.providerSkus.id,
+          providerId: s.providerSkus.providerId,
           productId: s.providerSkus.productId,
           costIdr: s.providerSkus.costIdr,
           priority: s.providerSkus.priority,
@@ -126,10 +126,12 @@ export async function readDemoPreviews(
       db
         .select({
           id: s.pricingRules.id,
+          name: s.pricingRules.name,
           scope: s.pricingRules.scope,
           categoryId: s.pricingRules.categoryId,
           brandId: s.pricingRules.brandId,
           productId: s.pricingRules.productId,
+          providerId: s.pricingRules.providerId,
           tierId: s.pricingRules.tierId,
           fixedMarkupIdr: s.pricingRules.fixedMarkupIdr,
           markupBps: s.pricingRules.markupBps,
@@ -165,15 +167,20 @@ export async function readDemoPreviews(
       let feeIdr: string | null = null;
       let totalIdr: string | null = null;
       if (choice) {
-        const rule = selectPricingRule(rules as PricingRule[], {
-          productId: product.id,
-          brandId: product.brandId,
-          categoryId: product.categoryId,
-          tierId,
-          referenceTime,
-        });
-        if (!rule) return { state: "pricing_error", products: [] };
-        const price = calculateCustomerPrice(choice.costIdr, rule);
+        const result = calculatePricing(
+          choice.costIdr,
+          rules as PricingRule[],
+          {
+            productId: product.id,
+            brandId: product.brandId,
+            categoryId: product.categoryId,
+            providerId: choice.providerId,
+            tierId,
+            referenceTime,
+          },
+        );
+        if (!result) return { state: "pricing_error", products: [] };
+        const price = result.sellingPriceIdr;
         const fee = paymentFees[payment];
         priceIdr = price.toString();
         feeIdr = fee.toString();
