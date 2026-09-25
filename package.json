@@ -24,6 +24,8 @@
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx scripts/seed.ts",
     "db:seed:demo": "tsx scripts/seed-demo.ts",
+    "db:seed:auth": "tsx scripts/seed-auth.ts",
+    "auth:bootstrap-admin": "tsx scripts/bootstrap-admin.ts",
     "db:validate:demo": "tsx scripts/validate-phase4.ts",
     "infra:check": "tsx scripts/check-infrastructure.ts",
     "worker": "tsx src/server/jobs/worker.ts"

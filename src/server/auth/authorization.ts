@@ -1,6 +1,17 @@
-import { AppError } from "../http/errors";
+import "server-only";
+import { currentIdentity, currentPermissions, currentSession } from "./session";
+import type { PermissionCode } from "./policy";
 
-export function requireAdmin(): never {
-  // Deny access until verified sessions and role authorization exist in Phase 9.
-  throw new AppError("ACCESS_DENIED", 403, "Akses admin belum tersedia.");
+export async function requireSession() {
+  return currentSession();
 }
+
+export async function requirePermission(permission: PermissionCode) {
+  return currentIdentity(permission);
+}
+
+export async function requireAdminAccess() {
+  return requirePermission("admin.access");
+}
+
+export { currentPermissions };

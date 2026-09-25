@@ -16,5 +16,5 @@ test("pricing workspace and mutation endpoint stay closed in production", async 
   });
   expect(api.status()).toBe(404);
   const admin = await page.goto("/admin");
-  expect(admin?.status()).toBe(404);
+  expect(admin?.url()).toContain("/login?returnTo=%2Fadmin");
 });

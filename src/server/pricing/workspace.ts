@@ -3,6 +3,7 @@ import { sql } from "drizzle-orm";
 import { createDatabase } from "@/server/db/connection";
 import * as s from "@/server/db/schema";
 import { localDemoPricingEnabled } from "./demo-gate";
+import { getEnvironment } from "@/server/config/env";
 import {
   calculatePricing,
   classifyCostFreshness,
@@ -14,9 +15,10 @@ export const demoReferenceTime = new Date("2026-09-24T05:00:00.000Z");
 
 export type WorkspaceData = Awaited<ReturnType<typeof loadWorkspace>>;
 
-export async function loadWorkspace() {
-  if (!localDemoPricingEnabled()) throw new Error("Demo workspace unavailable");
-  const { db, pool } = createDatabase(process.env.DATABASE_URL!);
+export async function loadWorkspace(mode: "demo" | "admin" = "demo") {
+  if (mode === "demo" && !localDemoPricingEnabled())
+    throw new Error("Demo workspace unavailable");
+  const { db, pool } = createDatabase(getEnvironment().DATABASE_URL);
   try {
     const [rules, tiers, categories, brands, products, providers, skus] =
       await Promise.all([

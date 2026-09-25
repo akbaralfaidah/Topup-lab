@@ -324,6 +324,39 @@ h4 {
   gap: 2rem;
   padding: 1.5rem;
 }
+.admin-shell > main {
+  min-width: 0;
+}
+.admin-rail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  align-self: start;
+  border-bottom: 1px solid var(--border-strong);
+  padding-bottom: 1rem;
+}
+.admin-rail .wordmark {
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+.admin-rail p {
+  color: var(--ink-muted);
+  font-size: 0.875rem;
+}
+.admin-rail nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+}
+.admin-rail nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 0.875rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 @media (min-width: 640px) {
   .page-container {
     width: min(calc(100% - 2 * var(--gutter)), var(--width-content));
@@ -348,6 +381,20 @@ h4 {
   }
   .admin-shell {
     grid-template-columns: 15rem minmax(0, 1fr);
+  }
+  .admin-rail {
+    display: block;
+    border-bottom: 0;
+    border-right: 1px solid var(--border-strong);
+    padding-right: 1.5rem;
+  }
+  .admin-rail p {
+    margin-top: 0.5rem;
+  }
+  .admin-rail nav {
+    display: grid;
+    gap: 0.25rem;
+    margin-top: 2rem;
   }
 }
 @media (prefers-reduced-motion: reduce) {

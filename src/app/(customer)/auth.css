@@ -1,0 +1,135 @@
+.auth-layout {
+  display: grid;
+  gap: clamp(2rem, 6vw, 6rem);
+  align-items: start;
+  max-width: 66rem;
+  margin-inline: auto;
+  padding-block: clamp(1rem, 4vw, 4rem);
+}
+.auth-intro {
+  max-width: 28rem;
+}
+.auth-kicker {
+  display: block;
+  margin-bottom: 1rem;
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+}
+.auth-intro h1 {
+  max-width: 13ch;
+}
+.auth-intro p {
+  margin-top: 1rem;
+  color: var(--ink-muted);
+}
+.auth-form {
+  display: grid;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 28rem;
+  border-top: 3px solid var(--brand);
+  padding-top: 1.5rem;
+}
+.auth-field {
+  display: grid;
+  gap: 0.5rem;
+}
+.auth-field label {
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+.auth-field input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.75rem 0.9rem;
+  background: var(--surface-default);
+  color: var(--ink);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  font: inherit;
+}
+.auth-field input:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+.auth-field p,
+.auth-switch {
+  font-size: 0.875rem;
+  color: var(--ink-muted);
+}
+.auth-password-wrap {
+  position: relative;
+}
+.auth-password-wrap input {
+  padding-right: 3.5rem;
+}
+.auth-password-wrap button {
+  position: absolute;
+  right: 0.2rem;
+  top: 0.2rem;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+}
+.auth-submit {
+  width: 100%;
+}
+.auth-submit:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.auth-switch a {
+  color: var(--ink);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.auth-error {
+  color: var(--danger-foreground);
+  background: var(--danger-subtle);
+  border: 1px solid var(--danger-border);
+  padding: 0.75rem;
+  font-size: 0.875rem;
+}
+.account-page {
+  max-width: 42rem;
+  margin-inline: auto;
+  padding-block: clamp(1rem, 4vw, 4rem);
+}
+.account-page > p {
+  margin-top: 1rem;
+  color: var(--ink-muted);
+}
+.account-page dl {
+  margin-block: 2rem;
+  border-block: 1px solid var(--border-strong);
+}
+.account-page dl > div {
+  display: grid;
+  gap: 0.25rem;
+  padding-block: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.account-page dl > div:last-child {
+  border: 0;
+}
+.account-page dt {
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+}
+.account-page dd {
+  margin: 0;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+@media (min-width: 768px) {
+  .auth-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 28rem);
+  }
+}

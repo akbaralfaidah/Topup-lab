@@ -38,6 +38,9 @@ export async function CustomerShell({
             <Link className="nav-link" href="/#bantuan">
               Bantuan
             </Link>
+            <Link className="nav-link" href="/account">
+              Akun
+            </Link>
           </nav>
           <details className="mobile-nav">
             <summary>Menu</summary>
@@ -51,6 +54,7 @@ export async function CustomerShell({
                 </>
               )}
               <Link href="/#bantuan">Bantuan</Link>
+              <Link href="/account">Akun</Link>
             </nav>
           </details>
         </div>

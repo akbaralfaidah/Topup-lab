@@ -3,7 +3,6 @@ import { test } from "node:test";
 import { parseEnvironment } from "../src/server/config/schema";
 import { errorResponse, AppError } from "../src/server/http/errors";
 import { requestIdFrom } from "../src/server/http/request-id";
-import { requireAdmin } from "../src/server/auth/authorization";
 import { checkReadiness } from "../src/server/health/readiness";
 import { stateTransition } from "../src/lib/motion/transitions";
 import { duration, distance, spring } from "../src/lib/motion/tokens";
@@ -90,15 +89,6 @@ test("malformed URLs and percent escapes cannot leak credentials through parser 
       },
     );
   }
-});
-test("admin authorization denies every call until real authentication exists", () => {
-  assert.throws(
-    requireAdmin,
-    (error: unknown) =>
-      error instanceof AppError &&
-      error.code === "ACCESS_DENIED" &&
-      error.status === 403,
-  );
 });
 test("errors never expose stack traces or unknown exception text", async () => {
   const response = errorResponse(

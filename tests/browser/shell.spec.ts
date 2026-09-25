@@ -65,14 +65,14 @@ test("keyboard and reduced motion retain access to the homepage", async ({
   await expect(faq).toHaveAttribute("aria-expanded", "true");
 });
 
-test("protected admin and unknown routes expose no operational content", async ({
+test("protected admin redirects guests to login and unknown routes expose no operational content", async ({
   page,
   request,
 }) => {
   const response = await request.get("/admin", {
     headers: { "x-role": "SUPER_ADMIN", cookie: "role=SUPER_ADMIN" },
   });
-  expect(response.status()).toBe(404);
+  expect(response.url()).toContain("/login?returnTo=%2Fadmin");
   await page.goto("/missing-page");
   await expect(
     page.getByRole("heading", { name: "Halaman tidak tersedia." }),

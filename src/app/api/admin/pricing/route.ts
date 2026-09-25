@@ -1,41 +1,42 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { pricingRequestSchema } from "@/server/pricing/http";
-import { localDemoPricingEnabled } from "@/server/pricing/demo-gate";
+import { requirePermission, requireSession } from "@/server/auth/authorization";
+import { boundedJson, validMutationOrigin } from "@/server/auth/http";
 import {
   previewRuleChange,
   readSimulation,
   RuleAdminError,
   saveRule,
 } from "@/server/pricing/administration";
+import { pricingRequestSchema } from "@/server/pricing/http";
 
 export const dynamic = "force-dynamic";
-
 const headers = { "Cache-Control": "no-store" };
 
 export async function POST(request: NextRequest) {
-  const host = request.headers.get("host");
-  if (
-    !localDemoPricingEnabled() ||
-    !host ||
-    !/^(localhost|127\.0\.0\.1):[0-9]{1,5}$/.test(host)
-  )
-    return new Response(null, { status: 404, headers });
-  if (request.headers.get("origin") !== `${request.nextUrl.protocol}//${host}`)
+  const session = await requireSession();
+  if (!session)
+    return NextResponse.json(
+      { state: "unauthorized" },
+      { status: 401, headers },
+    );
+  if (!validMutationOrigin(request))
     return NextResponse.json({ state: "forbidden" }, { status: 403, headers });
-  if (request.headers.get("content-type")?.split(";")[0] !== "application/json")
-    return NextResponse.json({ state: "invalid" }, { status: 415, headers });
-  const bodyText = await request.text();
-  if (bodyText.length > 4096)
-    return NextResponse.json({ state: "invalid" }, { status: 413, headers });
   let body: unknown;
   try {
-    body = JSON.parse(bodyText);
+    body = await boundedJson(request);
   } catch {
     return NextResponse.json({ state: "invalid" }, { status: 400, headers });
   }
   const parsed = pricingRequestSchema.safeParse(body);
   if (!parsed.success)
     return NextResponse.json({ state: "invalid" }, { status: 400, headers });
+  const access = await requirePermission("admin.access");
+  const actionPermission = await requirePermission(
+    parsed.data.action === "save" ? "pricing.write" : "pricing.read",
+  );
+  if (!access || !actionPermission)
+    return NextResponse.json({ state: "forbidden" }, { status: 403, headers });
+  const context = { mode: "admin" as const, actorId: session.userId };
   try {
     if (parsed.data.action === "simulate")
       return NextResponse.json(
@@ -45,6 +46,7 @@ export async function POST(request: NextRequest) {
             parsed.data.productId,
             parsed.data.tierId,
             parsed.data.referenceTime,
+            context,
           )),
         },
         { headers },
@@ -56,12 +58,13 @@ export async function POST(request: NextRequest) {
           preview: await previewRuleChange(
             parsed.data.rule,
             parsed.data.productId,
+            context,
           ),
         },
         { headers },
       );
     return NextResponse.json(
-      { state: "saved", ...(await saveRule(parsed.data.rule)) },
+      { state: "saved", ...(await saveRule(parsed.data.rule, context)) },
       { headers },
     );
   } catch (error) {

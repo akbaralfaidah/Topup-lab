@@ -3,6 +3,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { createDatabase } from "@/server/db/connection";
 import * as s from "@/server/db/schema";
 import { localDemoPricingEnabled } from "./demo-gate";
+import { getEnvironment } from "@/server/config/env";
 import { type PricingRule } from "./quote-math";
 import {
   parseRuleInput,
@@ -22,6 +23,16 @@ export class RuleAdminError extends Error {
   constructor(public code: "invalid" | "conflict" | "stale" | "unavailable") {
     super(code);
   }
+}
+
+export type PricingContext = { mode: "demo" | "admin"; actorId?: string };
+const demoContext: PricingContext = { mode: "demo" };
+
+function checkContext(context: PricingContext) {
+  if (context.mode === "demo" && !localDemoPricingEnabled())
+    throw new RuleAdminError("unavailable");
+  if (context.mode === "admin" && !context.actorId)
+    throw new RuleAdminError("unavailable");
 }
 
 function parsedRule(input: ParsedRuleInput): PricingRule {
@@ -89,15 +100,16 @@ function affectedProducts(data: WorkspaceData, rule: PricingRule) {
 export async function previewRuleChange(
   raw: unknown,
   selectedProductId?: string,
+  context: PricingContext = demoContext,
 ) {
-  if (!localDemoPricingEnabled()) throw new RuleAdminError("unavailable");
+  checkContext(context);
   let input: ParsedRuleInput;
   try {
     input = parseRuleInput(raw);
   } catch {
     throw new RuleAdminError("invalid");
   }
-  const data = await loadWorkspace();
+  const data = await loadWorkspace(context.mode);
   const draft = checkRule(input, data);
   const previous = input.id
     ? data.rules.find((rule) => rule.id === input.id)
@@ -150,17 +162,20 @@ export async function previewRuleChange(
   };
 }
 
-export async function saveRule(raw: unknown) {
-  if (!localDemoPricingEnabled()) throw new RuleAdminError("unavailable");
+export async function saveRule(
+  raw: unknown,
+  context: PricingContext = demoContext,
+) {
+  checkContext(context);
   let input: ParsedRuleInput;
   try {
     input = parseRuleInput(raw);
   } catch {
     throw new RuleAdminError("invalid");
   }
-  const data = await loadWorkspace();
+  const data = await loadWorkspace(context.mode);
   checkRule(input, data);
-  const { db, pool } = createDatabase(process.env.DATABASE_URL!);
+  const { db, pool } = createDatabase(getEnvironment().DATABASE_URL);
   try {
     return await db.transaction(
       async (tx) => {
@@ -216,16 +231,24 @@ export async function saveRule(raw: unknown) {
         const row = saved[0];
         if (!row) throw new RuleAdminError("stale");
         await tx.insert(s.auditLogs).values({
-          origin: "SYSTEM",
-          actorId: null,
-          action: input.id
-            ? "DEMO_PRICING_RULE_UPDATE"
-            : "DEMO_PRICING_RULE_CREATE",
+          origin: context.mode === "admin" ? "ADMIN" : "SYSTEM",
+          actorId: context.mode === "admin" ? context.actorId! : null,
+          action:
+            context.mode === "admin"
+              ? input.id
+                ? "PRICING_RULE_UPDATE"
+                : "PRICING_RULE_CREATE"
+              : input.id
+                ? "DEMO_PRICING_RULE_UPDATE"
+                : "DEMO_PRICING_RULE_CREATE",
           entityType: "pricing_rule",
           entityId: row.id,
           requestId: crypto.randomUUID(),
           metadata: {
-            reasonCode: "DEMO_PRICING_WORKSPACE",
+            reasonCode:
+              context.mode === "admin"
+                ? "ADMIN_PRICING_WORKSPACE"
+                : "DEMO_PRICING_WORKSPACE",
             changedFields: Object.keys(values),
           },
         });
@@ -252,9 +275,10 @@ export async function readSimulation(
   productId: string,
   tierId: string,
   referenceTime?: string,
+  context: PricingContext = demoContext,
 ) {
-  if (!localDemoPricingEnabled()) throw new RuleAdminError("unavailable");
-  const data = await loadWorkspace();
+  checkContext(context);
+  const data = await loadWorkspace(context.mode);
   const at = referenceTime ? new Date(referenceTime) : demoReferenceTime;
   if (!Number.isFinite(at.getTime())) throw new RuleAdminError("invalid");
   return {

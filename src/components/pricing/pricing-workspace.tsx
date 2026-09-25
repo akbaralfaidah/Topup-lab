@@ -8,7 +8,7 @@ import { useMotionPolicy } from "@/lib/motion/use-motion-policy";
 import type { WorkspaceView } from "@/server/pricing/workspace";
 import type { RuleInput } from "@/server/pricing/rule-input";
 
-type Props = { data: WorkspaceView; issues: string[] };
+type Props = { data: WorkspaceView; issues: string[]; endpoint?: string };
 type Simulation = {
   simulation: {
     productName: string;
@@ -117,8 +117,8 @@ const blank: RuleInput = {
   active: false,
 };
 
-async function action(body: object) {
-  const response = await fetch("/api/dev/pricing", {
+async function action(body: object, endpoint: string) {
+  const response = await fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     cache: "no-store",
@@ -129,7 +129,11 @@ async function action(body: object) {
   return result;
 }
 
-export function PricingWorkspace({ data, issues }: Props) {
+export function PricingWorkspace({
+  data,
+  issues,
+  endpoint = "/api/dev/pricing",
+}: Props) {
   const router = useRouter();
   const { reduced, transition } = useMotionPolicy();
   const [draft, setDraft] = useState<RuleInput>(blank);
@@ -190,14 +194,17 @@ export function PricingWorkspace({ data, issues }: Props) {
     setBusy(true);
     setMessage("");
     try {
-      const result = await action({
-        action: "simulate",
-        productId,
-        tierId,
-        ...(referenceTime
-          ? { referenceTime: fromWibInput(referenceTime) }
-          : {}),
-      });
+      const result = await action(
+        {
+          action: "simulate",
+          productId,
+          tierId,
+          ...(referenceTime
+            ? { referenceTime: fromWibInput(referenceTime) }
+            : {}),
+        },
+        endpoint,
+      );
       setSimulation({ simulation: result.simulation, tiers: result.tiers });
     } catch {
       setMessage(
@@ -212,11 +219,14 @@ export function PricingWorkspace({ data, issues }: Props) {
     setMessage("");
     setImpact(null);
     try {
-      const result = await action({
-        action: "preview",
-        rule: draft,
-        productId,
-      });
+      const result = await action(
+        {
+          action: "preview",
+          rule: draft,
+          productId,
+        },
+        endpoint,
+      );
       setImpact(result.preview);
       setPreviewStamp(JSON.stringify(draft));
     } catch (error) {
@@ -235,7 +245,7 @@ export function PricingWorkspace({ data, issues }: Props) {
     setBusy(true);
     setMessage("");
     try {
-      await action({ action: "save", rule: draft });
+      await action({ action: "save", rule: draft }, endpoint);
       router.refresh();
       window.location.reload();
     } catch (error) {
