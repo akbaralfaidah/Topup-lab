@@ -36,6 +36,28 @@ const schema = z
     APP_URL: connectionUrl(["http:", "https:"]),
     DATABASE_URL: connectionUrl(["postgres:", "postgresql:"]),
     REDIS_URL: connectionUrl(["redis:", "rediss:"]),
+    TARGET_ENCRYPTION_ACTIVE_KEY_ID: z.string().min(1),
+    TARGET_ENCRYPTION_KEYS: z.string().refine((val) => {
+      try {
+        const keys = JSON.parse(val);
+        if (typeof keys !== "object" || keys === null) return false;
+        for (const key of Object.values(keys)) {
+          if (
+            typeof key !== "string" ||
+            key.length !== 64 ||
+            !/^[a-fA-F0-9]+$/.test(key)
+          ) {
+            return false;
+          }
+        }
+        return true;
+      } catch {
+        return false;
+      }
+    }, "Must be a JSON object mapping key IDs to 64-char hex strings"),
+    QUOTE_HMAC_KEY: z.string().min(64).max(64),
+    GUEST_HMAC_KEY: z.string().min(64).max(64),
+    DEMO_PAYMENT_SECRET: z.string().default("local-development-demo-secret"),
   })
   .superRefine((env, ctx) => {
     if (

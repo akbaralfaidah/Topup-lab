@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import type { InputDefinition } from "@/server/db/schema/validation";
 import { validateTarget } from "@/lib/target-input";
 import { useMotionPolicy } from "@/lib/motion/use-motion-policy";
+import { useRouter } from "next/navigation";
 import {
   DenominationOption,
   PaymentMethodRow,
@@ -77,6 +78,7 @@ export function PreparationForm({
   const controllerRef = useRef<AbortController | null>(null);
   const sectionId = useId();
   const { reduced, transition } = useMotionPolicy();
+  const router = useRouter();
 
   useEffect(() => () => controllerRef.current?.abort(), []);
 
@@ -186,6 +188,55 @@ export function PreparationForm({
     }
   }
 
+  async function createOrder() {
+    if (!review || !selected || !payment) return;
+    if (pending) return;
+    setPending(true);
+    setMessage("");
+
+    try {
+      const idempotencyKey = crypto.randomUUID();
+      const response = await fetch("/api/checkout/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productSlug: selected,
+          paymentMethod: payment,
+          target,
+          quoteToken: review.quote.quoteToken,
+          idempotencyKey,
+        }),
+        cache: "no-store",
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        if (result.error === "price_changed") {
+          setMessage(
+            "Harga berubah sejak terakhir diperiksa. Silakan tinjau ulang.",
+          );
+          loadQuote(selected, payment);
+        } else if (result.error === "invalid_request") {
+          setErrors(result.errors ?? {});
+          setMessage("Periksa kembali data akun.");
+        } else if (result.error === "product_unavailable") {
+          setMessage("Produk ini sementara tidak tersedia.");
+        } else if (result.error === "quote_expired") {
+          setMessage("Sesi pratinjau kedaluwarsa. Silakan periksa kembali.");
+          loadQuote(selected, payment);
+        } else {
+          setMessage("Gagal membuat pesanan. Coba lagi.");
+        }
+        setPending(false);
+        return;
+      }
+      // Successful creation
+      router.push(`/orders/${result.publicReference}`);
+    } catch {
+      setMessage("Koneksi terputus. Coba lagi.");
+      setPending(false);
+    }
+  }
+
   return (
     <div className="prep-layout">
       <div className="prep-main">
@@ -292,7 +343,9 @@ export function PreparationForm({
                       : "Sementara tidak tersedia"
                   }
                   selected={selected === item.productSlug}
-                  disabled={!item.available || item.priceIdr === null}
+                  disabled={
+                    !item.available || item.priceIdr === null || pending
+                  }
                   onSelect={() => {
                     setSelected(item.productSlug);
                     loadQuote(item.productSlug, payment ?? "QRIS");
@@ -390,19 +443,18 @@ export function PreparationForm({
               <PriceBreakdown
                 lines={[
                   {
-                    label: "Harga produk contoh",
+                    label: "Harga produk",
                     value: formatIdr(review.quote.priceIdr),
                   },
                   {
-                    label: "Biaya pembayaran contoh",
+                    label: "Biaya pembayaran",
                     value: formatIdr(review.quote.feeIdr),
                   },
                 ]}
                 total={formatIdr(review.quote.totalIdr)}
               />
               <p className="prep-boundary">
-                Ini hanya pratinjau. Checkout transaksi akan diaktifkan setelah
-                sistem pesanan dan pembayaran tersedia.
+                Dengan membuat pesanan, Anda menyetujui total harga di atas.
               </p>
             </motion.div>
           ) : (
@@ -411,25 +463,38 @@ export function PreparationForm({
               ringkasannya. Belum ada pesanan yang dibuat.
             </p>
           )}
-          <button
-            type="button"
-            className="prep-review-button"
-            onClick={showReview}
-            disabled={pending || !selected || !payment || !quote}
-          >
-            {pending ? "Memeriksa harga…" : "Pratinjau pesanan"}
-            <ArrowRight size={18} aria-hidden="true" />
-          </button>
+          {review ? (
+            <button
+              type="button"
+              className="prep-review-button"
+              onClick={createOrder}
+              disabled={pending}
+            >
+              {pending ? "Membuat pesanan…" : "Buat pesanan"}
+              <ArrowRight size={18} aria-hidden="true" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="prep-review-button"
+              onClick={showReview}
+              disabled={pending || !selected || !payment || !quote}
+            >
+              {pending ? "Memeriksa harga…" : "Pratinjau pesanan"}
+              <ArrowRight size={18} aria-hidden="true" />
+            </button>
+          )}
         </section>
       </div>
       <aside className="prep-summary" aria-label="Ringkasan harga contoh">
-        <p className="catalog-kicker">Ringkasan demo</p>
+        <p className="catalog-kicker">Ringkasan pesanan</p>
         <h2>
           {selected
             ? products.find((item) => item.productSlug === selected)
                 ?.denomination
             : "Pilih nominal"}
         </h2>
+
         {pending ? (
           <p role="status" className="prep-loading">
             Memeriksa harga contoh…

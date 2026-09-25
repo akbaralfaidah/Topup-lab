@@ -21,6 +21,8 @@ const paymentFees: Record<DemoPayment, bigint> = {
 };
 const referenceTime = new Date("2026-09-24T05:00:00.000Z");
 
+import { signQuote } from "../checkout/quote-token";
+
 export type PublicQuote = {
   productSlug: string;
   productName: string;
@@ -30,6 +32,7 @@ export type PublicQuote = {
   feeIdr: string | null;
   totalIdr: string | null;
   payment: DemoPayment;
+  quoteToken?: string;
 };
 export type PreparedProduct = {
   quote: PublicQuote;
@@ -186,6 +189,14 @@ export async function readDemoPreviews(
         feeIdr = fee.toString();
         totalIdr = addPaymentFee(price, fee).toString();
       }
+      let quoteToken: string | undefined;
+      if (totalIdr) {
+        quoteToken = signQuote({
+          productSlug: product.slug,
+          payment,
+          totalIdr,
+        }).token;
+      }
       prepared.push({
         quote: {
           productSlug: product.slug,
@@ -196,6 +207,7 @@ export async function readDemoPreviews(
           feeIdr,
           totalIdr,
           payment,
+          quoteToken,
         },
         inputDefinition: parsed.data,
       });

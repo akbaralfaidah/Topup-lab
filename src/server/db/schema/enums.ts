@@ -155,3 +155,4 @@ export const settingKey = pgEnum("setting_key", [
 export type OrderStatus = (typeof orderStatus.enumValues)[number];
 export type ProviderAttemptStatus =
   (typeof providerAttemptStatus.enumValues)[number];
+export type ActorOrigin = (typeof actorOrigin.enumValues)[number];

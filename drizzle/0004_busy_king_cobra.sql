@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "payment_active_attempt_unique" ON "payments" USING btree ("order_id") WHERE "payments"."status" IN ('CREATED', 'PENDING');

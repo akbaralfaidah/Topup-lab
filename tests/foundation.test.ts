@@ -13,6 +13,14 @@ const valid = {
   APP_URL: "http://localhost:3000",
   DATABASE_URL: "postgresql://dev:local@localhost:5432/topuplab",
   REDIS_URL: "redis://localhost:6379",
+  TARGET_ENCRYPTION_ACTIVE_KEY_ID: "v1",
+  TARGET_ENCRYPTION_KEYS: JSON.stringify({
+    v1: "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+  }),
+  QUOTE_HMAC_KEY:
+    "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+  GUEST_HMAC_KEY:
+    "0987654321fedcba0987654321fedcba0987654321fedcba0987654321fedcba",
 };
 
 test("environment accepts isolated test configuration", () => {
